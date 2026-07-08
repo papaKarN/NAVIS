@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environnements virtuels
+venv/
+.venv/
+env/
+
+# Sorties générées par NAVIS (rapports HTML et exports)
+*.html
+*.html.gz
+nanopore_multi_summary*
+rapport*
+
+# OS / éditeurs
+.DS_Store
+.vscode/
+.idea/
