@@ -69,7 +69,7 @@ def parse_args():
     Available arguments:
       -i / --input             : one or more TXT input files (required)
       -o / --output            : output HTML filename
-                                 (default: nanopore_multi_summary.html)
+                                 (default: NAVIS_summary.html)
       -t / --threads           : number of CPU threads (default: 1)
       -b / --bin_size          : bin size in bp for heatmaps (default: 1000)
                                  → increase for very long reads,
@@ -84,10 +84,10 @@ def parse_args():
                                  → e.g. 95 = exclude the longest 5% of reads
                                  → applied independently per file
     """
-    parser = argparse.ArgumentParser(description="Multi-file Nanopore summary statistics V13.0")
+    parser = argparse.ArgumentParser(description="NAVIS summary statistics V13.0")
     parser.add_argument("-i", "--input", nargs='+', required=True,
                         help="TXT input files with columns: read_id, length, mean_quality")
-    parser.add_argument("-o", "--output", default="nanopore_multi_summary.html",
+    parser.add_argument("-o", "--output", default="NAVIS_summary.html",
                         help="Output HTML file")
     parser.add_argument("-t", "--threads", type=int, default=0,
                         help="Number of CPU threads (default: 0 = use all available CPUs)")
@@ -135,6 +135,15 @@ def parse_line(line):
         return length, mean_q
     except:
         return None
+
+
+def fmt_pct(value):
+    """
+    Formats a percentile value for display, preserving decimals when present.
+    Examples: 99.5 -> "99.5", 99 -> "99", 99.0 -> "99", 95.25 -> "95.25".
+    Avoids the rounding issue where ':.0f' turns 99.5 into '100'.
+    """
+    return f"{value:g}"
 
 
 def n50(lengths):
@@ -1366,7 +1375,7 @@ def main():
         f"padding:10px 16px;margin:12px 0;border-radius:4px;font-size:14px;'>"
         f"<b>Files:</b> {n_files} &nbsp;|&nbsp; "
         f"<b>Reads — Raw:</b> {total_raw:,} &nbsp;|&nbsp; "
-        f"<b>No Outliers (P{args.outlier_percentile:.0f}):</b> {total_nout:,} &nbsp;|&nbsp; "
+        f"<b>No Outliers (P{fmt_pct(args.outlier_percentile)}):</b> {total_nout:,} &nbsp;|&nbsp; "
         f"<b>Filtered:</b> {total_filt:,}"
         f"{'&nbsp;|&nbsp;<b>Active filters:</b> ' + ' | '.join(filter_info) if filter_info else ''}"
         f"</div>"
@@ -1590,7 +1599,7 @@ def main():
             # Bouton No Outliers (vert, couleur distincte)
             f"<span id='btn_{section}_no_outliers' class='toggle-btn-outlier' "
             f"onclick=\"toggleView('{section}','no_outliers')\">"
-            f"&#128683; No Outliers <small>(P{percentile:.0f})</small></span>"
+            f"&#128683; No Outliers <small>(P{fmt_pct(percentile)})</small></span>"
             # Bouton Filtered (bleu)
             f"<span id='btn_{section}_filtered' class='toggle-btn' "
             f"onclick=\"toggleView('{section}','filtered')\">&#128292; Filtered</span>"
@@ -1712,7 +1721,7 @@ def main():
     print(f"✅ Gzip HTML (smaller)        : {gz_output}")
     print(f"✅ Raw statistics (TXT)         : {txt_raw}")
     print(f"✅ Filtered statistics (TXT)       : {txt_filtered}")
-    print(f"   Outlier percentile         : P{args.outlier_percentile:.0f}")
+    print(f"   Outlier percentile         : P{fmt_pct(args.outlier_percentile)}")
     for name, thr in outlier_thresholds.items():
         print(f"   Threshold [{name}] : ≤ {thr:,.0f} bp")
     if filter_active:
